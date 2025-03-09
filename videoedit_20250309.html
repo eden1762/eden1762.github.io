@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     // 影片裁剪
-    window.trimVideo = async function () {
+    function trimVideo() {
         if (!videoFile) {
             alert("請先上傳影片！");
             return;
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     // 最終輸出影片
-    window.exportVideo = async function () {
+    function exportVideo() {
         if (!videoFile) {
             alert("請先上傳影片！");
             return;
