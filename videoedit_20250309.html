@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎥 長者友善影片剪輯</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
@@ -28,13 +28,13 @@
 </div>
 
 <script>
-    console.log("202503091953");
+    console.log("202503091957");
 let ffmpeg;
 document.addEventListener("DOMContentLoaded", async function () {
     const { createFFmpeg, fetchFile } = FFmpeg;
     ffmpeg = createFFmpeg({
         log: true,
-        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"  // ✅ 修正 `corePath`
+        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"  // ✅ 修正 `corePath`
     });
 
     console.log("🚀 初始化 FFmpeg...");
