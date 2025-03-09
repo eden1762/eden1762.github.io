@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎥 長者友善影片剪輯</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.worker.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
@@ -22,26 +20,36 @@
     <input type="number" id="startTime" min="0" step="0.1"><br>
     <label>結束時間（秒）：</label>
     <input type="number" id="endTime" min="0" step="0.1"><br>
-   <button id="trimBtn">✂️ 剪輯影片</button>
+    <button id="trimBtn" disabled>✂️ 剪輯影片 (FFmpeg 加載中...)</button>
 
     <h3>📤 輸出影片</h3>
-     <button id="exportBtn">💾 輸出影片</button>
+    <button id="exportBtn" disabled>💾 輸出影片 (FFmpeg 加載中...)</button>
     <a id="downloadLink" style="display: none;" download="output.mp4">📥 下載影片</a>
 </div>
 
 <script>
-    console.log("202503091949");
+let ffmpeg;
 document.addEventListener("DOMContentLoaded", async function () {
-    const { createFFmpeg, fetchFile } = FFmpeg; // ✅ 這樣確保 FFmpeg 變數可用
-    const ffmpeg = createFFmpeg({
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    ffmpeg = createFFmpeg({
         log: true,
-        corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"
+        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"  // ✅ 修正 `corePath`
     });
+
+    console.log("🚀 初始化 FFmpeg...");
+    await ffmpeg.load();  // ✅ 確保 FFmpeg 預先載入
+    console.log("✅ FFmpeg 加載完成");
+
+    // 解除按鈕禁用
+    document.getElementById('trimBtn').innerText = "✂️ 剪輯影片";
+    document.getElementById('trimBtn').disabled = false;
+    document.getElementById('exportBtn').innerText = "💾 輸出影片";
+    document.getElementById('exportBtn').disabled = false;
 
     let videoFile;
 
     // 影片匯入
-    document.getElementById('videoInput').addEventListener('change', async function(event) {
+    document.getElementById('videoInput').addEventListener('change', function(event) {
         videoFile = event.target.files[0];
         if (videoFile) {
             const videoPlayer = document.getElementById('videoPlayer');
@@ -49,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-     // 影片裁剪
+    // 影片裁剪
     window.trimVideo = async function() {  // ✅ 讓函數變成全域變數
         if (!videoFile) {
             alert("請先上傳影片！");
