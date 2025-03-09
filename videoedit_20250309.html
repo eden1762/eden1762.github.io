@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎥 長者友善影片剪輯</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
@@ -29,9 +29,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-    const { createFFmpeg, fetchFile } = FFmpeg;  // ✅ 使用 `FFmpeg` 變數
+    const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({
-        log: true
+        log: true,
+        corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"
     });
 
     await ffmpeg.load(); // ✅ 確保 FFmpeg 預先載入
@@ -39,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let videoFile;
 
     // 影片匯入
-    document.getElementById('videoInput').addEventListener('change', async function(event) {
+    document.getElementById('videoInput').addEventListener('change', function(event) {
         videoFile = event.target.files[0];
         if (videoFile) {
             const videoPlayer = document.getElementById('videoPlayer');
