@@ -29,11 +29,13 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-    const { createFFmpeg, fetchFile } = FFmpeg; // ✅ 這樣確保 FFmpeg 變數可用
+    const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({
         log: true,
-        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js"
+        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"  // 🔥 使用正確的 corePath
     });
+
+    await ffmpeg.load(); // 🚀 確保 FFmpeg 先載入
 
     let videoFile;
 
@@ -61,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        if (!ffmpeg.isLoaded()) await ffmpeg.load();
+        await ffmpeg.load();
 
         ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
 
@@ -81,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        if (!ffmpeg.isLoaded()) await ffmpeg.load();
+        await ffmpeg.load();
 
         ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
 
