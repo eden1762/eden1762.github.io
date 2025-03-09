@@ -20,22 +20,21 @@
     <input type="number" id="startTime" min="0" step="0.1"><br>
     <label>結束時間（秒）：</label>
     <input type="number" id="endTime" min="0" step="0.1"><br>
-    <button onclick="trimVideo()">✂️ 剪輯影片</button>
+    <button id="trimBtn">✂️ 剪輯影片</button>
 
     <h3>📤 輸出影片</h3>
-    <button onclick="exportVideo()">💾 輸出影片</button>
+    <button id="exportBtn">💾 輸出影片</button>
     <a id="downloadLink" style="display: none;" download="output.mp4">📥 下載影片</a>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-    const { createFFmpeg, fetchFile } = FFmpeg;
+    const { createFFmpeg, fetchFile } = FFmpeg;  // ✅ 使用 `FFmpeg` 變數
     const ffmpeg = createFFmpeg({
-        log: true,
-        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js"  // 🔥 使用正確的 corePath
+        log: true
     });
 
-    await ffmpeg.load(); // 🚀 確保 FFmpeg 先載入
+    await ffmpeg.load(); // ✅ 確保 FFmpeg 預先載入
 
     let videoFile;
 
@@ -49,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     // 影片裁剪
-    window.trimVideo = async function () {
+    async function trimVideo() {
         if (!videoFile) {
             alert("請先上傳影片！");
             return;
@@ -63,8 +62,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
 
-        await ffmpeg.load();
-
         ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
 
         await ffmpeg.run('-i', 'input.mp4', '-ss', startTime, '-to', endTime, '-c', 'copy', 'trimmed.mp4');
@@ -76,14 +73,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.getElementById('downloadLink').style.display = 'block';
     };
 
-    // 最終輸出影片
-    window.exportVideo = async function () {
+    // 影片輸出
+    async function exportVideo() {
         if (!videoFile) {
             alert("請先上傳影片！");
             return;
         }
-
-        await ffmpeg.load();
 
         ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
 
@@ -95,6 +90,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.getElementById('downloadLink').href = url;
         document.getElementById('downloadLink').style.display = 'block';
     };
+
+    // 設定按鈕點擊事件
+    document.getElementById('trimBtn').addEventListener('click', trimVideo);
+    document.getElementById('exportBtn').addEventListener('click', exportVideo);
 });
 </script>
 
