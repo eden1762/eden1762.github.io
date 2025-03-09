@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎥 長者友善影片剪輯</title>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/wasm@0.10.2"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
@@ -28,70 +28,72 @@
 </div>
 
 <script>
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ 
-    log: true, 
-    corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/wasm@0.10.2/dist/ffmpeg-core.js"
+document.addEventListener("DOMContentLoaded", async function () {
+    const { createFFmpeg, fetchFile } = FFmpeg; // ✅ 這樣確保 FFmpeg 變數可用
+    const ffmpeg = createFFmpeg({
+        log: true,
+        corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.6/dist/ffmpeg-core.js"
+    });
+
+    let videoFile;
+
+    // 影片匯入
+    document.getElementById('videoInput').addEventListener('change', async function(event) {
+        videoFile = event.target.files[0];
+        if (videoFile) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = URL.createObjectURL(videoFile);
+        }
+    });
+
+    // 影片裁剪
+    window.trimVideo = async function () {
+        if (!videoFile) {
+            alert("請先上傳影片！");
+            return;
+        }
+
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+
+        if (!startTime || !endTime || parseFloat(startTime) >= parseFloat(endTime)) {
+            alert("請輸入有效的時間範圍！");
+            return;
+        }
+
+        if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+        ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
+
+        await ffmpeg.run('-i', 'input.mp4', '-ss', startTime, '-to', endTime, '-c', 'copy', 'trimmed.mp4');
+
+        const data = ffmpeg.FS('readFile', 'trimmed.mp4');
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+
+        document.getElementById('downloadLink').href = url;
+        document.getElementById('downloadLink').style.display = 'block';
+    };
+
+    // 最終輸出影片
+    window.exportVideo = async function () {
+        if (!videoFile) {
+            alert("請先上傳影片！");
+            return;
+        }
+
+        if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+        ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
+
+        await ffmpeg.run('-i', 'input.mp4', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', 'output.mp4');
+
+        const data = ffmpeg.FS('readFile', 'output.mp4');
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+
+        document.getElementById('downloadLink').href = url;
+        document.getElementById('downloadLink').style.display = 'block';
+    };
 });
-
-let videoFile;
-
-// 影片匯入
-document.getElementById('videoInput').addEventListener('change', async function(event) {
-    videoFile = event.target.files[0];
-    if (videoFile) {
-        const videoPlayer = document.getElementById('videoPlayer');
-        videoPlayer.src = URL.createObjectURL(videoFile);
-    }
-});
-
-// 影片裁剪
-async function trimVideo() {
-    if (!videoFile) {
-        alert("請先上傳影片！");
-        return;
-    }
-
-    const startTime = document.getElementById('startTime').value;
-    const endTime = document.getElementById('endTime').value;
-
-    if (!startTime || !endTime || parseFloat(startTime) >= parseFloat(endTime)) {
-        alert("請輸入有效的時間範圍！");
-        return;
-    }
-
-    if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
-
-    await ffmpeg.run('-i', 'input.mp4', '-ss', startTime, '-to', endTime, '-c', 'copy', 'trimmed.mp4');
-
-    const data = ffmpeg.FS('readFile', 'trimmed.mp4');
-    const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-
-    document.getElementById('downloadLink').href = url;
-    document.getElementById('downloadLink').style.display = 'block';
-}
-
-// 最終輸出影片
-async function exportVideo() {
-    if (!videoFile) {
-        alert("請先上傳影片！");
-        return;
-    }
-
-    if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
-
-    await ffmpeg.run('-i', 'input.mp4', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', 'output.mp4');
-
-    const data = ffmpeg.FS('readFile', 'output.mp4');
-    const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-
-    document.getElementById('downloadLink').href = url;
-    document.getElementById('downloadLink').style.display = 'block';
-}
 </script>
 
 </body>
